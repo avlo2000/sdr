@@ -52,8 +52,8 @@ f = np.linspace(sample_rate / -2, sample_rate / 2, len(psd))
 
 # Plot time domain
 plt.figure(0)
-plt.plot(np.real(rx_samples[::100]))
-plt.plot(np.imag(rx_samples[::100]))
+plt.plot(np.real(rx_samples))
+plt.plot(np.imag(rx_samples))
 plt.xlabel("Time")
 
 # Plot freq domain
