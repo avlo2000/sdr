@@ -1,42 +1,53 @@
 import adi
-import numpy as np
-import time
 import cv2
+import numpy as np
+from numpy.fft import fftshift
+from scipy import signal
+import matplotlib.pyplot as plt
+import time
+from take_sample import take_sample, create_rnd_signal
 
-sample_rate = 30e6  # Hz
-center_freq = int(2.4e9)  # Hz
-num_samps = 1000  # number of samples per call to rx()
+
+freq = int(1.280e9)
+sample_rate = 2.688e6  # Hz
+num_samps = 299999  # number of samples per call to rx()
 
 sdr = adi.Pluto("ip:192.168.2.1")
 sdr.sample_rate = int(sample_rate)
 
+# Config Tx
+sdr.tx_rf_bandwidth = int(sample_rate)  # filter cutoff, just set it to the same as sample rate
+sdr.tx_hardwaregain_chan0 = 0.0  # Increase to increase tx power, valid range is -90 to 0 dB
+sdr.tx_lo = freq
+
 # Config Rx
-sdr.rx_lo = int(center_freq)
 sdr.rx_rf_bandwidth = int(sample_rate)
 sdr.rx_buffer_size = num_samps
-sdr.gain_control_mode_chan0 = 'fast_attack'
-sdr.rx_hardwaregain_chan0 = 50.0  # dB, increase to increase the receive gain, but be careful not to saturate the ADC
+sdr.rx_output_type = 'raw'
+sdr.rx_annotated = False
+sdr.gain_control_mode_chan0 = 'manual'
+sdr.rx_hardwaregain_chan0 = 50.0
+sdr.rx_lo = freq
 
-for _ in range(20):
-    _ = sdr.rx()
+num_symbols = 100
+samples = create_rnd_signal(num_symbols)
 
-samples_cnt = 500
-spec_view = np.zeros([samples_cnt, num_samps])
-spec_idx = 0
+sdr.tx_cyclic_buffer = True
+sdr.tx(samples)
+
+for i in range(0, 10):
+    raw_data = sdr.rx()
+
 while True:
     t0 = time.time()
-    rx_data = sdr.rx()
-    print(f"Time: {time.time() - t0}")
+    x = sdr.rx()
+    print(f"Acquisition time: {time.time() - t0}s")
 
-    psd = np.abs(np.fft.fftshift(np.fft.fft(rx_data))) ** 2
-    psd_dB = 10 * np.log10(psd)
-    spec_view[spec_idx, :] = psd_dB * 10
-    if spec_idx < samples_cnt - 1:
-        spec_idx += 1
-    else:
-        spec_view = np.roll(spec_view, 1, axis=0)
-    cv2.imshow("spec_view", spec_view)
-    cv2.waitKey(20)
-
-    f = np.linspace(sample_rate / -2, sample_rate / 2, len(psd))
-
+    f, t, Sxx = signal.spectrogram(x, sample_rate, nperseg=1024)
+    spec = np.abs(Sxx)
+    spec /= np.max(spec)
+    sdr.tx_destroy_buffer()
+    sdr.tx(samples)
+    # canva = cv2.cvtColor(spec.T, cv2.COLOR_GRAY2BGR)
+    cv2.imshow('spec', spec.T)
+    cv2.waitKey(10)

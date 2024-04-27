@@ -6,7 +6,7 @@ import time
 from take_sample import take_sample, create_rnd_signal
 
 sample_rate = 1.92e6  # Hz
-center_freq = int(2.4e9)  # Hz
+center_freq = int(5.0e9)  # Hz
 num_samps = 100000  # number of samples per call to rx()
 
 sdr = adi.Pluto("ip:192.168.2.1")
