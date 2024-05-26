@@ -1,15 +1,14 @@
+import time
+
 import adi
 import cv2
 import numpy as np
-from numpy.fft import fftshift
 from scipy import signal
-import matplotlib.pyplot as plt
-import time
-from take_sample import take_sample, create_rnd_signal
 
+from take_sample import create_rnd_signal
 
-freq = int(1.280e9)
-sample_rate = 2.688e6  # Hz
+freq = int(0.433e9)
+sample_rate = 1.688e6  # Hz
 num_samps = 299999  # number of samples per call to rx()
 
 sdr = adi.Pluto("ip:192.168.2.1")
@@ -48,6 +47,6 @@ while True:
     spec /= np.max(spec)
     sdr.tx_destroy_buffer()
     sdr.tx(samples)
-    # canva = cv2.cvtColor(spec.T, cv2.COLOR_GRAY2BGR)
+
     cv2.imshow('spec', spec.T)
     cv2.waitKey(10)
