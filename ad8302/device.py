@@ -1,12 +1,26 @@
+import dataclasses
 import time
 from typing import Callable
 
 import numpy as np
 import serial
+import re
 
 
-def parse(s: str) -> np.ndarray:
-    res = np.array([float(val.split(': ')[1]) for val in s.split(' | ')[:4]])
+@dataclasses.dataclass(init=False)
+class ParseResult:
+    vphs: np.ndarray
+    vmag: np.ndarray
+
+
+def parse(s: str) -> ParseResult:
+    res = ParseResult()
+    vmag_matches = re.findall(r'VMAG[0-3]:\s*(-?\d*\.\d+|-?\d+\.?)', s)
+    vphs_matches = re.findall(r'VPHS[0-3]:\s*(-?\d*\.\d+|-?\d+\.?)', s)
+    res.vmag = np.array([float(val) for val in vmag_matches])
+    res.vphs = np.array([float(val) for val in vphs_matches])
+    if not len(res.vphs) == len(res.vmag) == 4:
+        raise RuntimeError("Wrong len")
     return res
 
 
@@ -15,19 +29,27 @@ def v_to_phs(vol: np.ndarray) -> np.ndarray:
     return phs
 
 
+def v_to_mag(vol: np.ndarray) -> np.ndarray:
+    mag0 = -30
+    mag1 = +30
+    v0 = 0.5
+    v1 = 1.8
+    mag = mag0 + (mag1 - mag0) * vol / (v1 - v0)
+    return mag
+
+
 class Device:
     def __init__(self, path_id: str):
         self.serial = serial.Serial(path_id)
 
-    def spin(self, callback: Callable[[float, np.ndarray], None]):
-        while self.serial.isOpen():
+    def spin(self, callback: Callable[[float, ParseResult], None]):
+        while True:
             s = self.serial.readline().decode("Ascii")
-            if s.startswith('Voltage'):
-                try:
-                    arr = parse(s)
-                except (ValueError, IndexError):
-                    print("Error parsing data")
-                    continue
-                t = time.time()
-                print(f"{t}: {arr}")
-                callback(t, arr)
+            try:
+                arr = parse(s)
+            except (ValueError, IndexError, RuntimeError):
+                print("Error parsing data")
+                continue
+            t = time.time()
+            print(f"{t}: {arr}")
+            callback(t, arr)
