@@ -64,7 +64,7 @@ def update(val):
     fft_re.set_ydata(real)
     fft_im.set_ydata(imag)
     ax2.set_ylim(min(min(real), min(imag)), max(max(real), max(imag)))
-    fft_abs = real**2 + imag**2
+    fft_abs = real ** 2 + imag ** 2
     fft_sum.set_ydata(fft_abs)
     ax3.set_ylim(min(fft_abs) - 500, max(fft_abs) + 500)
     fig.canvas.draw_idle()
@@ -82,6 +82,8 @@ button = Button(resetax, 'Reset', hovercolor='0.975')
 def reset(event):
     freq_slider.reset()
     phase_slider.reset()
+
+
 button.on_clicked(reset)
 
 plt.show()
