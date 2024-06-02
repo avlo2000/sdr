@@ -65,7 +65,7 @@ def main():
         print(f"doa estimated: {doa_est}")
         print()
         errors /= np.max(errors)
-        doa2err.set_xdata(np.rad2deg(doas))
+        doa2err.set_xdata(-np.rad2deg(doas))
         doa2err.set_ydata(errors)
 
         doa2err_polar.set_xdata(doas)
