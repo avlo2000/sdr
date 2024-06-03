@@ -3,8 +3,8 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-from ad8302.device import Device, v_to_phs, ParseResult, v_to_mag
-from ad8302.beamformer import Beamformer
+from device import Device, v_to_phs, ParseResult, v_to_mag
+from beamformer import Beamformer
 
 
 def main():
