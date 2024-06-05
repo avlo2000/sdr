@@ -1,4 +1,5 @@
 from collections import deque
+from time import sleep
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -34,7 +35,7 @@ def main():
         phs_lines.append(line)
 
     ax3 = plt.subplot(313)
-    ax3.set_ylim([-30, +30])
+    ax3.set_ylim([-35, +35])
     mag_lines = []
     for i in range(num_ant):
         line, = ax3.plot([], lw=3, label=f'ant{i}')
@@ -60,7 +61,7 @@ def main():
         mins.set_xdata(mns_x)
         mins.set_ydata(mns_y)
         print(mns_x[:5])
-
+        plt.grid(True)
         time_data.append(t)
         ax2.set_xlim(max(time_data) - 10.0, max(time_data) + 1.0)
         ax3.set_xlim(max(time_data) - 10.0, max(time_data) + 1.0)
@@ -76,6 +77,7 @@ def main():
 
         fig.canvas.draw()
         fig.canvas.flush_events()
+        sleep(0.01)
 
     dev.spin(live_update)
 
