@@ -25,7 +25,7 @@ def parse(s: str) -> ParseResult:
 
 
 def v_to_phs(vol: np.ndarray) -> np.ndarray:
-    phs = -100 * (vol - 1.8)
+    phs = -100 * (vol - 1.8) - 90
     return phs
 
 
