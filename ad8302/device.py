@@ -25,16 +25,12 @@ def parse(s: str) -> ParseResult:
 
 
 def v_to_phs(vol: np.ndarray) -> np.ndarray:
-    phs = -100 * vol
+    phs = -100 * (vol - 0.9)
     return phs
 
 
 def v_to_mag(vol: np.ndarray) -> np.ndarray:
-    mag0 = -30
-    mag1 = +30
-    v0 = 0.5
-    v1 = 1.8
-    mag = mag0 + (mag1 - mag0) * vol / (v1 - v0)
+    mag = (vol - 0.9) / 0.03
     return mag
 
 
