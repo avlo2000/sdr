@@ -15,7 +15,7 @@ def main():
          [0.1, 0.0],
          [-0.1, 0.0],
          [-0.2, 0.0]]
-    ) * 0.2
+    )
     fig = plt.figure()
     x_coord_axis = fig.add_axes((0.25, 0.0, 0.65, 0.03))
     src_loc_x_slider = Slider(
