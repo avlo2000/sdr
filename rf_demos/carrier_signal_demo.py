@@ -24,7 +24,7 @@ def main():
     plt.plot(time, carrier_sig)
 
     sos = signal.butter(10, carrier_freq, 'hp', fs=fs, output='sos')
-    sig_tx = signal.sosfilt(sos, sig12)
+    sig_tx = sig12  # signal.sosfilt(sos, sig12)
 
     plt.subplot(813)
     plot_spec(sig12, fs)
