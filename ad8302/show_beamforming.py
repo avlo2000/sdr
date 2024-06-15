@@ -40,7 +40,7 @@ def main():
     mins, = ax2.plot([], [], lw=3, label='mins', marker='o')
 
     ax3 = plt.subplot(413)
-    ax3.set_ylim([-10.0, 180.0])
+    ax3.set_ylim([-190.0, +190.0])
     phs_lines = []
     for i in range(num_ant):
         line, = ax3.plot([], lw=3, label=f'ant{i}')
@@ -64,6 +64,8 @@ def main():
 
     def live_update(t: float, parse: ParseResult):
         phases = v_to_phs(parse.vphs)
+        calib_phase = np.array([4.41439799,  -1.80766718, -27.81835218,  37.77389599])
+        phases += calib_phase
         doas, errors = beamformer.doa_pattern(np.deg2rad(phases))
         errors /= np.max(errors)
         doas = np.rad2deg(doas)

@@ -45,10 +45,13 @@ class Device:
 
     def spin(self, callback: Callable[[float, ParseResult], None]):
         while True:
-            s = self.serial.readline().decode("Ascii")
-            try:
-                arr = parse(s)
-            except (ValueError, IndexError, RuntimeError):
-                print("Error parsing data")
-                continue
-            callback(arr.t/1000, arr)
+            self.spin_once(callback)
+
+    def spin_once(self, callback: Callable[[float, ParseResult], None]):
+        s = self.serial.readline().decode("Ascii")
+        try:
+            arr = parse(s)
+        except (ValueError, IndexError, RuntimeError):
+            print("Error parsing data")
+            return
+        callback(arr.t / 1000, arr)
