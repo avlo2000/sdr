@@ -1,3 +1,5 @@
+from collections import deque
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
@@ -9,7 +11,8 @@ from ad8302.spacial import calc_phase_diff
 def main():
     freq = 0.433e+9
     ref_loc = np.array([[0.0, 0.0]])
-    src_loc = np.array([[130.0, 100.0]])
+    src_r = 3.0
+
     ants_loc = np.array(
         [[0.2, 0.0],
          [0.1, 0.0],
@@ -18,20 +21,24 @@ def main():
     )
     fig = plt.figure()
     x_coord_axis = fig.add_axes((0.25, 0.0, 0.65, 0.03))
-    src_loc_x_slider = Slider(
+    src_loc_ang_slider = Slider(
         ax=x_coord_axis,
         label="src x coord",
-        valmin=-300,
-        valmax=+300,
+        valmin=-180,
+        valmax=+180,
         valinit=0.0,
         orientation="horizontal"
     )
 
     beamformer = Beamformer(freq, (ants_loc - ref_loc)[:, 0])
     ax1 = plt.subplot(411)
+
+    ang = np.deg2rad(src_loc_ang_slider.val)
+    src_loc = np.array([[np.cos(ang) * src_r, np.sin(ang) * src_r]])
     geom_loc_scatter, = plt.plot(src_loc[:, 0], src_loc[:, 1], marker='X')
     plt.scatter(ants_loc[:, 0], ants_loc[:, 1], marker='*')
-    ax1.set_xlim([-300, +300])
+    ax1.set_xlim([-src_r, +src_r])
+    ax1.set_ylim([-src_r, +src_r])
 
     ax2 = plt.subplot(412)
     doa2err, = plt.plot([], [])
@@ -42,22 +49,33 @@ def main():
     doa2err_polar, = plt.plot([], [])
 
     ax4 = plt.subplot(414)
-    phase_data = [[0]] * len(ants_loc)
-    phase_lines = []
-    time_data = [0]
+    phs_lines = []
+    phase_data = deque(maxlen=2000)
+    ax4.set_xlim([0, phase_data.maxlen])
+    ax4.set_ylim([-180, +180])
     for i in range(len(ants_loc)):
-        line, = ax4.plot(time_data, phase_data[i])
-        phase_lines.append(line)
+        line, = ax4.plot([], [])
+        phs_lines.append(line)
 
     def update(_):
-        src_loc[:, 0] = src_loc_x_slider.val
+        ang = np.deg2rad(src_loc_ang_slider.val)
+        src_loc = np.array([[np.cos(ang) * src_r, np.sin(ang) * src_r]])
         doa = np.rad2deg(np.arctan2(src_loc[:, 1], src_loc[:, 0]))
         print(f"doa real: {doa.item()}")
         geom_loc_scatter.set_xdata(src_loc[:, 0])
+        geom_loc_scatter.set_ydata(src_loc[:, 1])
 
-        time_data.append(time_data[-1] + 1)
         d_phases = calc_phase_diff(src_loc, ants_loc, ref_loc, freq)
-        print(np.rad2deg(d_phases))
+
+        # Making it more realistic
+        d_phases += np.deg2rad(np.array([38, 40, -11, 65]))
+        d_phases[d_phases >= np.pi / 2] = np.pi - d_phases[d_phases >= np.pi / 2]
+        d_phases[d_phases <= -np.pi / 2] = np.pi + d_phases[d_phases <= -np.pi / 2]
+
+        phase_data.append(np.rad2deg(d_phases))
+        for j, y in enumerate(np.array(phase_data).T):
+            phs_lines[j].set_data(np.arange(len(y)), y)
+
         doas, errors = beamformer.doa_pattern(d_phases)
         doa_est = np.rad2deg(doas[np.argmin(errors[np.abs(errors < 100)])]) + 90
 
@@ -71,7 +89,7 @@ def main():
         doa2err_polar.set_ydata(errors)
         fig.canvas.draw_idle()
 
-    src_loc_x_slider.on_changed(update)
+    src_loc_ang_slider.on_changed(update)
 
     plt.show()
 
