@@ -21,4 +21,5 @@ def calc_phase_diff(src_loc: np.ndarray, ants_loc: np.ndarray, ref_loc: np.ndarr
     for j, loc in enumerate(ants_loc):
         phase = calc_phase(src_loc[0], np.array(loc), freq)
         d_phases[j] = ang_diff(phase, phase_ref)
+
     return d_phases
