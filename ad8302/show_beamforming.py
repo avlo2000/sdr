@@ -12,7 +12,7 @@ def main():
     freq = 0.450e9
     d_to_ref = np.array([-0.205, -0.104, 0.100, 0.202])
     beamformer = Beamformer(freq, d_to_ref)
-    dev = Device('/dev/ttyACM0')
+    dev = Device('COM5')
 
     fig = plt.figure()
     plt.grid(True)
@@ -56,11 +56,17 @@ def main():
         errors /= np.max(errors)
         doas = np.rad2deg(doas)
         beamloss.set_data(doas, errors)
-        mns_x = doas[np.argsort(errors)[:2]]
-        mns_y = errors[np.argsort(errors)[:2]]
+
+        idx1, idx2 = np.argsort(errors)[:2]
+        if -90 < doas[idx1] < +90:
+            idx = idx1
+        else:
+            idx = idx2
+        mns_x = doas[idx]
+        mns_y = errors[idx]
         mins.set_xdata(mns_x)
         mins.set_ydata(mns_y)
-        print(mns_x[:5])
+
         plt.grid(True)
         time_data.append(t)
         ax2.set_xlim(max(time_data) - 10.0, max(time_data) + 1.0)
