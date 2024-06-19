@@ -50,7 +50,8 @@ def main():
 
     ax4 = plt.subplot(414)
     phs_lines = []
-    phase_data = deque(maxlen=2000)
+    n = 200
+    phase_data = deque(maxlen=n)
     ax4.set_xlim([0, phase_data.maxlen])
     ax4.set_ylim([-180, +180])
     for i in range(len(ants_loc)):

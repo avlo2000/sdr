@@ -11,7 +11,6 @@ from beamformer import Beamformer
 def main():
     freq = 0.433e9
     d_to_ref = np.array([-0.2, -0.1, 0.1, 0.2])
-    d_to_ref = np.array([-0.2, -0.1, 0.1, 0.2])
     beamformer = Beamformer(freq, d_to_ref)
     dev = Device('/dev/ttyACM0')
 
@@ -58,14 +57,17 @@ def main():
 
     plt.show(block=False)
 
-    time_data = deque(maxlen=2000)
-    phase_data = deque(maxlen=2000)
-    mag_data = deque(maxlen=2000)
+    n = 2000
+    time_data = deque(maxlen=n)
+    phase_data = deque(maxlen=n)
+    mag_data = deque(maxlen=n)
 
     def live_update(t: float, parse: ParseResult):
         phases = v_to_phs(parse.vphs)
-        calib_phase = np.array([4.41439799,  -1.80766718, -27.81835218,  37.77389599])
-        phases += calib_phase
+        phs_sym = phases[:2] - phases[2:]
+        print(phs_sym)
+        # calib_phase = np.array([4.41439799,  -1.80766718, -27.81835218,  37.77389599])
+        # phases += calib_phase
         doas, errors = beamformer.doa_pattern(np.deg2rad(phases))
         errors /= np.max(errors)
         doas = np.rad2deg(doas)
@@ -83,7 +85,7 @@ def main():
         ax4.set_xlim(max(time_data) - 10.0, max(time_data) + 1.0)
 
         phase_data.append(phases)
-        mag_data.append(v_to_mag(parse.vmag))
+        mag_data.append(phs_sym)
 
         for j, y in enumerate(np.array(phase_data).T):
             phs_lines[j].set_data(time_data, y)
