@@ -27,7 +27,7 @@ def collect_calib_data():
 
 
 def main():
-    src_loc = np.array([[0.0, 3]])
+    src_loc = np.array([[0.0, 5]])
     print(f"Place source at {src_loc} meter from radat")
     freq = 0.433e9
 

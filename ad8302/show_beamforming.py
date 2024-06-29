@@ -28,7 +28,6 @@ def main():
     beamloss_polar, = ax1.plot([], [], lw=3, label='beamloss')
     mins_polar, = ax1.plot([], [], lw=3, label='mins')
 
-
     ax2 = plt.subplot(412)
     # ax1.set_theta_zero_location('N')
     # ax1.set_theta_direction(-1)
@@ -66,16 +65,22 @@ def main():
         phases = v_to_phs(parse.vphs)
         phs_sym = phases[:2] - phases[2:]
         print(phs_sym)
-        # calib_phase = np.array([4.41439799,  -1.80766718, -27.81835218,  37.77389599])
-        # phases += calib_phase
+        calib_phase = np.array([-23.81806847, -38.0616589,  -39.5434629,  25.38799953])
+        phases += calib_phase
         doas, errors = beamformer.doa_pattern(np.deg2rad(phases))
         errors /= np.max(errors)
         doas = np.rad2deg(doas)
         beamloss.set_data(doas, errors)
-        mns_x = doas[np.argsort(errors)[:2]]
-        mns_y = errors[np.argsort(errors)[:2]]
-        mins.set_xdata(mns_x)
-        mins.set_ydata(mns_y)
+
+        idx1, idx2 = np.argsort(errors)[:2]
+        if -90 < doas[idx1] < +90:
+            idx = idx1
+        else:
+            idx = idx2
+        mns_x = doas[idx]
+        mns_y = errors[idx]
+        mins.set_xdata([mns_x, mns_x])
+        mins.set_ydata([mns_y, mns_y])
         beamloss_polar.set_xdata(np.deg2rad(doas))
         beamloss_polar.set_ydata(errors)
 
