@@ -14,8 +14,8 @@ def main():
     src_r = 3.0
 
     ants_loc = np.array(
-        [[0.2, 0.0],
-         [0.1, 0.0],
+        [[0.3, 0.0],
+         [0.7, 0.0],
          [-0.1, 0.0],
          [-0.2, 0.0]]
     )
@@ -42,7 +42,7 @@ def main():
 
     ax2 = plt.subplot(512)
     doa2err, = plt.plot([], [])
-    ax2.set_xlim([-180, +180])
+    ax2.set_xlim([-240, +240])
     ax2.set_ylim([0, 1])
 
     plt.subplot(413, projection='polar')
@@ -53,16 +53,16 @@ def main():
     n = 200
     phase_data = deque(maxlen=n)
     ax4.set_xlim([0, phase_data.maxlen])
-    ax4.set_ylim([-180, +180])
+    ax4.set_ylim([-240, +240])
     for i in range(len(ants_loc)):
         line, = ax4.plot([], [])
         phs_lines.append(line)
 
     ax5 = plt.subplot(515)
-    phs_lines = []
-    ax5.set_xlim([-180, +180])
-    ax5.set_ylim([-180, +180])
+    ax5.set_xlim([-240, +240])
+    ax5.set_ylim([-240, +240])
     scatter, = ax5.plot([], [], marker='o')
+    ax5.set_aspect('equal')
 
     def update(_):
         ang = np.deg2rad(src_loc_ang_slider.val)
@@ -75,13 +75,13 @@ def main():
         d_phases = calc_phase_diff(src_loc, ants_loc, ref_loc, freq)
 
         # Making it more realistic
-        d_phases += np.deg2rad(np.array([38, 40, -11, 65]))
-        d_phases[d_phases >= np.pi / 2] = np.pi - d_phases[d_phases >= np.pi / 2]
-        d_phases[d_phases <= -np.pi / 2] = np.pi + d_phases[d_phases <= -np.pi / 2]
+        # d_phases += np.deg2rad(np.array([38, 40, -11, 65]))
+        # d_phases[d_phases >= np.pi / 2] = np.pi - d_phases[d_phases >= np.pi / 2]
+        # d_phases[d_phases <= -np.pi / 2] = np.pi + d_phases[d_phases <= -np.pi / 2]
 
-        # phase_data.append(np.rad2deg(d_phases))
-        # for j, y in enumerate(np.array(phase_data).T):
-        #     phs_lines[j].set_data(np.arange(len(y)), y)
+        phase_data.append(np.rad2deg(d_phases))
+        for j, y in enumerate(np.array(phase_data).T):
+            phs_lines[j].set_data(np.arange(len(y)), y)
 
         scatter.set_data(np.array(phase_data).T[0], np.array(phase_data).T[1])
 
