@@ -2,12 +2,16 @@ import numpy as np
 from scipy.constants import c
 
 
+def freq_to_wavelength(freq: float):
+    return c / freq
+
+
 def ang_diff(ang0: np.ndarray, ang1: np.ndarray) -> np.ndarray:
     return np.arctan2(np.sin(ang0 - ang1), np.cos(ang0 - ang1))
 
 
 def calc_phase(src: np.ndarray, ant: np.ndarray, freq: float) -> np.ndarray:
-    wavelength = c / freq
+    wavelength = freq_to_wavelength(freq)
     src_inv = src.copy()
     d = np.linalg.norm(src_inv - ant)
     phs = 2.0 * np.pi * d / wavelength

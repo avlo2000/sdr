@@ -7,12 +7,12 @@ class PhaseSpace2:
         self._n = n
         self._m = m
 
-    def plot(self, ax: plt.Axes, n_lines: int, n2: int):
+    def plot(self, ax: plt.Axes):
         ax.set_aspect('equal')
         k = self._n / self._m
 
-        n1_r = int((self._m + 1) // 2)
-        n2_r = int((self._m + 1) // 2)
+        n1_r = int((self._m + 1) // 2) + 1
+        n2_r = int((self._n + 1) // 2) + 1
         for n1 in range(-n1_r, +n1_r):
             for n2 in range(-n2_r, +n2_r):
                 b = 2.0 * np.pi * (self._n * n1 - self._m * n2) / self._m
@@ -23,6 +23,8 @@ class PhaseSpace2:
                 x = np.rad2deg([xp0, xp1])
                 y = np.rad2deg([yp0, yp1])
                 ax.plot(y, x, c='blue')
+                ax.set_xlim([-180, 180])
+                ax.set_ylim([-180, 180])
 
 
 class PhaseSpace:
@@ -34,6 +36,6 @@ if __name__ == '__main__':
     def main():
         ps2 = PhaseSpace2(5, 8)
         ax = plt.subplot(111)
-        ps2.plot(ax, 50, 1)
+        ps2.plot(ax)
         plt.show()
     main()

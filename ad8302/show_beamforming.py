@@ -65,8 +65,8 @@ def main():
         phases = v_to_phs(parse.vphs)
         phs_sym = phases[:2] - phases[2:]
         print(phs_sym)
-        calib_phase = np.array([-23.81806847, -38.0616589,  -39.5434629,  25.38799953])
-        phases += calib_phase
+        # calib_phase = np.array([-23.81806847, -38.0616589,  -39.5434629,  25.38799953])
+        # phases += calib_phase
         doas, errors = beamformer.doa_pattern(np.deg2rad(phases))
         errors /= np.max(errors)
         doas = np.rad2deg(doas)
