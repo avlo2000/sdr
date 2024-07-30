@@ -3,16 +3,21 @@ from time import sleep
 
 import numpy as np
 from matplotlib import pyplot as plt
+from scipy.signal import find_peaks
 
+from ad8302.arrays import create_linear_array
 from device import Device, v_to_phs, ParseResult, v_to_mag
 from beamformer import Beamformer
 
 
 def main():
     freq = 0.433e9
-    d_to_ref = np.array([-0.2, -0.1, 0.1, 0.2])
-    beamformer = Beamformer(freq, d_to_ref)
-    dev = Device('/dev/ttyACM0')
+
+    ants_loc, topology = create_linear_array(freq)
+    beamformer = Beamformer(freq, ants_loc, topology)
+
+    dev = Device('COM5')
+    # dev = Device('/dev/ttyACM0')
 
     fig = plt.figure()
     plt.grid(True)
@@ -23,19 +28,14 @@ def main():
     ax1.set_theta_zero_location('N')
     ax1.set_theta_direction(-1)
     ax1.set_rlabel_position(55)
-    ax1.set_xlim([-180, +180])
     ax1.set_ylim([0, 1.1])
     beamloss_polar, = ax1.plot([], [], lw=3, label='beamloss')
-    mins_polar, = ax1.plot([], [], lw=3, label='mins')
 
     ax2 = plt.subplot(412)
-    # ax1.set_theta_zero_location('N')
-    # ax1.set_theta_direction(-1)
-    # ax1.set_rlabel_position(55)
     ax2.set_xlim([-180, +180])
     ax2.set_ylim([0, 1.1])
     beamloss, = ax2.plot([], [], lw=3, label='beamloss')
-    mins, = ax2.plot([], [], lw=3, label='mins', marker='o')
+    peaks_plot, = ax2.plot([], [], lw=3, label='peaks', marker='o')
 
     ax3 = plt.subplot(413)
     ax3.set_ylim([-190.0, +190.0])
@@ -64,23 +64,17 @@ def main():
     def live_update(t: float, parse: ParseResult):
         phases = v_to_phs(parse.vphs)
         phs_sym = phases[:2] - phases[2:]
-        print(phs_sym)
-        calib_phase = np.array([-23.81806847, -38.0616589,  -39.5434629,  25.38799953])
-        phases += calib_phase
+        # calib_phase = np.array([-23.81806847, -38.0616589,  -39.5434629,  25.38799953])
+        # phases += calib_phase
         doas, errors = beamformer.doa_pattern(np.deg2rad(phases))
         errors /= np.max(errors)
         doas = np.rad2deg(doas)
         beamloss.set_data(doas, errors)
 
-        idx1, idx2 = np.argsort(errors)[:2]
-        if -90 < doas[idx1] < +90:
-            idx = idx1
-        else:
-            idx = idx2
-        mns_x = doas[idx]
-        mns_y = errors[idx]
-        mins.set_xdata([mns_x, mns_x])
-        mins.set_ydata([mns_y, mns_y])
+        peaks, info = find_peaks(errors)
+
+        peaks_plot.set_xdata(doas[peaks])
+        peaks_plot.set_ydata(errors[peaks])
         beamloss_polar.set_xdata(np.deg2rad(doas))
         beamloss_polar.set_ydata(errors)
 

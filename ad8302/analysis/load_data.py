@@ -34,11 +34,17 @@ def load_data(path_to_json: Path):
 
 if __name__ == '__main__':
     def main():
-        res = load_data(Path('../data/football_field/dataset_4m.json'))
+        res = list(load_data(Path('../data/non_labeled.json')))
+        all_phs_data = [[], [], [], []]
         for sample in res:
-            filt = HistFilter(5)
-            for phs in sample.phs_data:
-                phs_filtered = filt.filter(phs)
-                plt.plot(phs_filtered)
-            plt.show()
+            for i, phs in enumerate(sample.phs_data):
+                all_phs_data[i].extend(phs)
+
+        all_phs_data = np.array(all_phs_data)
+        plt.plot(all_phs_data[0])
+        plt.plot(all_phs_data[1])
+        plt.plot(all_phs_data[2])
+        plt.plot(all_phs_data[3])
+        plt.show()
+        print(np.max(all_phs_data, axis=1) - np.min(all_phs_data, axis=1))
     main()

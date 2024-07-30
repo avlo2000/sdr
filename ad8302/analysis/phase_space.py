@@ -16,6 +16,7 @@ class PhaseSpace2:
         for n1 in range(-n1_r, +n1_r):
             for n2 in range(-n2_r, +n2_r):
                 b = 2.0 * np.pi * (self._n * n1 - self._m * n2) / self._m
+                print((self._n * n1 - self._m * n2) / self._m)
                 xp0 = -np.pi
                 xp1 = +np.pi
                 yp0 = k * xp0 + b
