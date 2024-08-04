@@ -5,9 +5,10 @@ from scipy.signal import find_peaks
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 
-from ad8302.arrays import create_linear_array, create_square_array, create_triangular_array
+from ad8302.arrays import create_grably_array, create_square_array, create_triangular_array, create_circular_array, \
+    create_linear_array, create_circular_one_ref_array
 from ad8302.beamformer import Beamformer
-from ad8302.spacial import calc_phase_diff
+from ad8302.spacial import calc_phase_diff_np
 
 
 def main():
@@ -18,14 +19,14 @@ def main():
     x_coord_axis = fig.add_axes((0.25, 0.0, 0.65, 0.03))
     src_loc_ang_slider = Slider(
         ax=x_coord_axis,
-        label="src x coord",
+        label="AOA",
         valmin=-180,
         valmax=+180,
         valinit=0.0,
         orientation="horizontal"
     )
 
-    ants_loc, topology = create_linear_array(freq)
+    ants_loc, topology = create_grably_array(freq)
     beamformer = Beamformer(freq, ants_loc, topology)
 
     ax1 = plt.subplot(411)
@@ -50,16 +51,10 @@ def main():
     n = 200
     phase_data = deque(maxlen=n)
     ax4.set_xlim([0, phase_data.maxlen])
-    ax4.set_ylim([-100, +100])
+    ax4.set_ylim([-180, +180])
     for i in range(len(ants_loc)):
         line, = ax4.plot([], [])
         phs_lines.append(line)
-
-    # ax5 = plt.subplot(515)
-    # ax5.set_xlim([-200, +200])
-    # ax5.set_ylim([-200, +200])
-    # scatter, = ax5.plot([], [], marker='o')
-    # ax5.set_aspect('equal')
 
     def update(_):
         ang = np.deg2rad(src_loc_ang_slider.val)
@@ -69,20 +64,18 @@ def main():
         geom_loc_scatter.set_xdata(src_loc[:, 0])
         geom_loc_scatter.set_ydata(src_loc[:, 1])
 
-        d_phases = abs(calc_phase_diff(src_loc, ants_loc, topology, freq)) - np.pi / 2
+        d_phases = abs(calc_phase_diff_np(src_loc, ants_loc, topology, freq)) + np.random.normal(scale=0.002, size=len(topology))
 
         phase_data.append(np.rad2deg(d_phases))
         for j, y in enumerate(np.array(phase_data).T):
             phs_lines[j].set_data(np.arange(len(y)), y)
 
-        # scatter.set_data(np.array(phase_data).T[0], np.array(phase_data).T[1])
-
-        doas, errors = beamformer.doa_pattern(d_phases)
+        doas, errors = beamformer.doa_pattern(d_phases, 1000)
         peaks, _ = find_peaks(errors)
 
         print(f"doa estimated: {np.rad2deg(doas[peaks])}")
         print()
-        errors /= np.max(errors)
+
         doa2err.set_xdata(-np.rad2deg(doas))
         doa2err.set_ydata(errors)
 

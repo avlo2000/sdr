@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from ad8302.device import Device, v_to_phs, ParseResult
 
 NUM_ANTS = 4
-NUM_SAMPLES = 200
+NUM_SAMPLES = 1000
 idx = 0
 
 
@@ -19,7 +19,7 @@ plt.legend()
 
 plt.show(block=False)
 phs_lines = []
-n = 200
+n = 50
 time_data = deque(maxlen=NUM_SAMPLES)
 phase_data = deque(maxlen=NUM_SAMPLES)
 ax.set_xlim([0, phase_data.maxlen])

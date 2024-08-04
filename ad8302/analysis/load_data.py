@@ -6,6 +6,7 @@ from typing import Dict
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ad8302.analysis.despike import Despiker
 from ad8302.analysis.filter import HistFilter
 
 
@@ -34,17 +35,27 @@ def load_data(path_to_json: Path):
 
 if __name__ == '__main__':
     def main():
-        res = list(load_data(Path('../data/non_labeled.json')))
-        all_phs_data = [[], [], [], []]
+        res = list(load_data(Path('../data/dataset3m_home_31_07.json')))
+        raw_data = [[], [], [], []]
         for sample in res:
             for i, phs in enumerate(sample.phs_data):
-                all_phs_data[i].extend(phs)
+                raw_data[i].extend(phs)
 
-        all_phs_data = np.array(all_phs_data)
-        plt.plot(all_phs_data[0])
-        plt.plot(all_phs_data[1])
-        plt.plot(all_phs_data[2])
-        plt.plot(all_phs_data[3])
+        raw_data = np.array(raw_data)
+
+        plt.subplot(311)
+        for data in raw_data:
+            plt.plot(data)
+        data_despiked = raw_data.copy()
+        for _ in range(100):
+            data_despiked = Despiker(data_despiked).despike()
+        plt.subplot(312)
+        for data in data_despiked:
+            plt.plot(data)
+
+        plt.subplot(313)
+        plt.scatter(np.sin(np.deg2rad(data_despiked[0])), np.deg2rad(data_despiked[1]))
+
         plt.show()
-        print(np.max(all_phs_data, axis=1) - np.min(all_phs_data, axis=1))
+        print(np.max(raw_data, axis=1) - np.min(raw_data, axis=1))
     main()

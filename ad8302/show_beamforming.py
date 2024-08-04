@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import find_peaks
 
-from ad8302.arrays import create_linear_array
+from ad8302.arrays import create_grably_array
 from device import Device, v_to_phs, ParseResult, v_to_mag
 from beamformer import Beamformer
 
@@ -13,11 +13,11 @@ from beamformer import Beamformer
 def main():
     freq = 0.433e9
 
-    ants_loc, topology = create_linear_array(freq)
+    ants_loc, topology = create_grably_array(freq)
     beamformer = Beamformer(freq, ants_loc, topology)
 
-    dev = Device('COM5')
-    # dev = Device('/dev/ttyACM0')
+    # dev = Device('COM5')
+    dev = Device('/dev/ttyACM0')
 
     fig = plt.figure()
     plt.grid(True)
@@ -64,10 +64,9 @@ def main():
     def live_update(t: float, parse: ParseResult):
         phases = v_to_phs(parse.vphs)
         phs_sym = phases[:2] - phases[2:]
-        # calib_phase = np.array([-23.81806847, -38.0616589,  -39.5434629,  25.38799953])
-        # phases += calib_phase
-        doas, errors = beamformer.doa_pattern(np.deg2rad(phases))
-        errors /= np.max(errors)
+        calib_phase = np.array([-55.90190513,   5.00437745, -63.71424255,   1.47771887])
+        phases += calib_phase
+        doas, errors = beamformer.doa_pattern(np.deg2rad(phases), 1000)
         doas = np.rad2deg(doas)
         beamloss.set_data(doas, errors)
 

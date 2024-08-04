@@ -1,42 +1,40 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
+from ad8302.arrays import create_grably_array
+from ad8302.beamformer import Beamformer
 
-class PhaseSpace2:
-    def __init__(self, n: float, m: float):
-        self._n = n
-        self._m = m
-
-    def plot(self, ax: plt.Axes):
-        ax.set_aspect('equal')
-        k = self._n / self._m
-
-        n1_r = int((self._m + 1) // 2) + 1
-        n2_r = int((self._n + 1) // 2) + 1
-        for n1 in range(-n1_r, +n1_r):
-            for n2 in range(-n2_r, +n2_r):
-                b = 2.0 * np.pi * (self._n * n1 - self._m * n2) / self._m
-                print((self._n * n1 - self._m * n2) / self._m)
-                xp0 = -np.pi
-                xp1 = +np.pi
-                yp0 = k * xp0 + b
-                yp1 = k * xp1 + b
-                x = np.rad2deg([xp0, xp1])
-                y = np.rad2deg([yp0, yp1])
-                ax.plot(y, x, c='blue')
-                ax.set_xlim([-180, 180])
-                ax.set_ylim([-180, 180])
+"""Goal of my life is to map measured phases onto this function"""
 
 
 class PhaseSpace:
-    def __init__(self, lambdas_to_ref: np.ndarray, freq: np.ndarray):
-        pass
+    def __init__(self, freq: float, ants_loc: np.ndarray, topology: np.ndarray):
+        self.freq = freq
+        self.ants_loc = ants_loc
+        self.topology = topology
+        self.beamformer = Beamformer(freq, ants_loc, topology)
+
+    def phase_curve(self, resolution: int):
+        doas = np.linspace(-np.pi, +np.pi, resolution)
+        phases = self.beamformer.doa_to_phases(doas)
+        return doas, phases
+
+    def plot(self, resolution: int, ax: plt.Axes) -> (np.ndarray, np.ndarray):
+        doas, phases = self.phase_curve(resolution)
+        for i, phase in enumerate(phases):
+            ax.plot(doas, phase, label=f'phase{i}')
 
 
 if __name__ == '__main__':
     def main():
-        ps2 = PhaseSpace2(5, 8)
+        freq = 0.433e+9
+        ants_loc, topology = create_grably_array(freq)
+        ps2 = PhaseSpace(freq, ants_loc, topology)
         ax = plt.subplot(111)
-        ps2.plot(ax)
+        ps2.plot(1000, ax)
+        plt.legend()
         plt.show()
+
+
     main()
