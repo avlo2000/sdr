@@ -26,7 +26,7 @@ def main():
         orientation="horizontal"
     )
 
-    ants_loc, topology = create_grably_array(freq)
+    ants_loc, topology = create_circular_array(freq)
     beamformer = Beamformer(freq, ants_loc, topology)
 
     ax1 = plt.subplot(411)

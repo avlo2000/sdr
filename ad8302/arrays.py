@@ -74,7 +74,7 @@ def create_triangular_array(freq: float):
 def create_circular_array(freq: float):
     wavelen = c / freq
     n = 7
-    r = wavelen / 1.5
+    r = wavelen / (4 * np.sin(np.pi / n))
     topology = []
     ants_loc = []
     for i in range(n):
